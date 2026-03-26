@@ -1,0 +1,13 @@
+services:
+  rat-bot:
+    build: .
+    container_name: rat-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - FORUM_CHANNEL_ID=${FORUM_CHANNEL_ID}
+    # If the bot doesn't need to expose any ports, we don't need a ports section.
+    # Discord bots usually only need outbound internet access.

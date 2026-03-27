@@ -452,7 +452,7 @@ func interactionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 		// 3. Update ephemeral response with a link to the new post
 		s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Content: pointer("Forum post created! [Link](https://discord.com/channels/" + i.GuildID + "/" + thread.ID + ")"),
+			Content: pointer("Added **" + embed.Title + "**! [Link](https://discord.com/channels/" + i.GuildID + "/" + thread.ID + ")"),
 		})
 
 	case "cancel_search":

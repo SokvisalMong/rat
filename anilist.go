@@ -32,8 +32,9 @@ type AniListMedia struct {
 	Episodes     int     `json:"episodes"`
 	Duration     int     `json:"duration"` // Added duration
 	SeasonYear   int     `json:"seasonYear"`
-	Status       string  `json:"status"`
-	Description  string  `json:"description"`
+	Status       string             `json:"status"`
+	Description  string             `json:"description"`
+	Genres       []string           `json:"genres"` // Added genres
 	CoverImage   struct {
 		Large string `json:"large"`
 	} `json:"coverImage"`
@@ -68,6 +69,7 @@ func searchAniList(title string) ([]AniListMedia, error) {
 			english
 		  }
 		  seasonYear
+		  genres
 		}
 	  }
 	}
@@ -113,6 +115,7 @@ func getAniListDetails(id int) (*AniListMedia, error) {
 		seasonYear
 		status
 		description
+		genres
 		coverImage {
 		  large
 		}

@@ -24,28 +24,36 @@ type TMDBResult struct {
 	ReleaseDate  string  `json:"release_date"`   // For movies
 	FirstAirDate string  `json:"first_air_date"` // For TV shows
 	VoteAverage  float64 `json:"vote_average"`
+	GenreIDs     []int   `json:"genre_ids"` // Added for select menu
+}
+
+type TMDBGenre struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 type TMDBTVDetails struct {
-	ID               int     `json:"id"`
-	Name             string  `json:"name"`
-	Overview         string  `json:"overview"`
-	PosterPath       string  `json:"poster_path"`
-	FirstAirDate     string  `json:"first_air_date"`
-	VoteAverage      float64 `json:"vote_average"`
-	NumberOfEpisodes int     `json:"number_of_episodes"`
-	NumberOfSeasons  int     `json:"number_of_seasons"`
-	EpisodeRunTime   []int   `json:"episode_run_time"` // Added episode_run_time
+	ID               int         `json:"id"`
+	Name             string      `json:"name"`
+	Overview         string      `json:"overview"`
+	PosterPath       string      `json:"poster_path"`
+	FirstAirDate     string      `json:"first_air_date"`
+	VoteAverage      float64     `json:"vote_average"`
+	NumberOfEpisodes int         `json:"number_of_episodes"`
+	NumberOfSeasons  int         `json:"number_of_seasons"`
+	EpisodeRunTime   []int       `json:"episode_run_time"` // Added episode_run_time
+	Genres           []TMDBGenre `json:"genres"`           // Added genres
 }
 
 type TMDBMovieDetails struct {
-	ID          int     `json:"id"`
-	Title       string  `json:"title"`
-	Overview    string  `json:"overview"`
-	PosterPath  string  `json:"poster_path"`
-	ReleaseDate string  `json:"release_date"`
-	VoteAverage float64 `json:"vote_average"`
-	Runtime     int     `json:"runtime"`
+	ID          int         `json:"id"`
+	Title       string      `json:"title"`
+	Overview    string      `json:"overview"`
+	PosterPath  string      `json:"poster_path"`
+	ReleaseDate string      `json:"release_date"`
+	VoteAverage float64     `json:"vote_average"`
+	Runtime     int         `json:"runtime"`
+	Genres      []TMDBGenre `json:"genres"` // Added genres
 }
 
 func searchTMDB(query string) ([]TMDBResult, error) {

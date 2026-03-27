@@ -64,10 +64,18 @@ func main() {
 		}
 
 		guildID := os.Getenv("GUILD_ID")
-		for _, v := range commands {
-			_, err := s.ApplicationCommandCreate(s.State.User.ID, guildID, v)
+
+		// Register commands to the guild if specified, otherwise globally
+		_, err := s.ApplicationCommandBulkOverwrite(s.State.User.ID, guildID, commands)
+		if err != nil {
+			log.Printf("Cannot register commands: %v\n", err)
+		}
+
+		// If a GUILD_ID is set, clear global commands to prevent duplicates from previous runs
+		if guildID != "" {
+			_, err = s.ApplicationCommandBulkOverwrite(s.State.User.ID, "", nil)
 			if err != nil {
-				log.Printf("Cannot create '%v' command: %v\n", v.Name, err)
+				log.Printf("Cannot clear global commands: %v\n", err)
 			}
 		}
 	})
@@ -190,7 +198,7 @@ func searchAndPreview(query string) ([]discordgo.SelectMenuOption, *discordgo.Me
 				option: discordgo.SelectMenuOption{
 					Label:       fmt.Sprintf("[Anime] %s", truncate(label, 90)),
 					Value:       fmt.Sprintf("anilist:%d", res.ID),
-					Description: fmt.Sprintf("Year: %d", res.SeasonYear),
+					Description: fmt.Sprintf("Year: %d | %s", res.SeasonYear, truncate(strings.Join(res.Genres, ", "), 50)),
 				},
 			})
 		}
@@ -315,7 +323,6 @@ func interactionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
 						Content: "No results found.",
-						Flags:   discordgo.MessageFlagsEphemeral,
 					},
 				})
 				return
@@ -351,7 +358,6 @@ func interactionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 							},
 						},
 					},
-					Flags: discordgo.MessageFlagsEphemeral,
 				},
 			})
 		}
@@ -478,6 +484,7 @@ func buildAniListEmbed(media *AniListMedia) *discordgo.MessageEmbed {
 	fields := []*discordgo.MessageEmbedField{
 		{Name: "Rating", Value: fmt.Sprintf("%d/100", media.AverageScore), Inline: true},
 		{Name: "Year", Value: fmt.Sprintf("%d", media.SeasonYear), Inline: true},
+		{Name: "Genres", Value: strings.Join(media.Genres, ", "), Inline: true},
 		{Name: "Episodes", Value: fmt.Sprintf("%d", media.Episodes), Inline: true},
 		{Name: "Duration", Value: fmt.Sprintf("%d mins", media.Duration), Inline: true},
 		{Name: "Status", Value: media.Status, Inline: true},
@@ -525,6 +532,12 @@ func buildTMDBTVEmbed(data *TMDBTVDetails) *discordgo.MessageEmbed {
 		duration = fmt.Sprintf("%d mins", data.EpisodeRunTime[0])
 	}
 
+	// Add genres
+	genres := []string{}
+	for _, g := range data.Genres {
+		genres = append(genres, g.Name)
+	}
+
 	return &discordgo.MessageEmbed{
 		Title:       data.Name,
 		Description: data.Overview,
@@ -532,6 +545,7 @@ func buildTMDBTVEmbed(data *TMDBTVDetails) *discordgo.MessageEmbed {
 		Fields: []*discordgo.MessageEmbedField{
 			{Name: "Rating", Value: fmt.Sprintf("%.1f/10", data.VoteAverage), Inline: true},
 			{Name: "Year", Value: year, Inline: true},
+			{Name: "Genres", Value: strings.Join(genres, ", "), Inline: true},
 			{Name: "Seasons", Value: fmt.Sprintf("%d", data.NumberOfSeasons), Inline: true},
 			{Name: "Episodes", Value: fmt.Sprintf("%d", data.NumberOfEpisodes), Inline: true},
 			{Name: "Avg. Duration", Value: duration, Inline: true},
@@ -546,6 +560,12 @@ func buildTMDBMovieEmbed(data *TMDBMovieDetails) *discordgo.MessageEmbed {
 	if len(year) > 4 {
 		year = year[:4]
 	}
+	// Add genres
+	genres := []string{}
+	for _, g := range data.Genres {
+		genres = append(genres, g.Name)
+	}
+
 	return &discordgo.MessageEmbed{
 		Title:       data.Title,
 		Description: data.Overview,
@@ -553,6 +573,7 @@ func buildTMDBMovieEmbed(data *TMDBMovieDetails) *discordgo.MessageEmbed {
 		Fields: []*discordgo.MessageEmbedField{
 			{Name: "Rating", Value: fmt.Sprintf("%.1f/10", data.VoteAverage), Inline: true},
 			{Name: "Year", Value: year, Inline: true},
+			{Name: "Genres", Value: strings.Join(genres, ", "), Inline: true},
 			{Name: "Runtime", Value: fmt.Sprintf("%d mins", data.Runtime), Inline: true},
 			{Name: "Type", Value: "Movie", Inline: true},
 		},

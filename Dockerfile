@@ -1,6 +1,6 @@
 # Use the official Golang image to create a build artifact.
 # This is a multi-stage build. In the first stage, we build the executable.
-FROM golang:1.24-alpine AS builder
+FROM golang:1.26.1-alpine AS builder
 
 # Install git. 
 # Git is required for fetching the dependencies.
